@@ -10,18 +10,59 @@
  * governing permissions and limitations under the License.
  */
 
+/* _brand
+ * San Antonio Mutual Aid Directory design tokens.
+ * Base palette:
+ * - #025e73 (teal)
+ * - #011f26 (deep ink)
+ * - #a5a692 (sage)
+ * - #bfb78f (sand)
+ * - #f2a71b (sunrise)
+ */
 :root {
-  /* colors */
-  --background-color: white;
-  --light-color: #f8f8f8;
-  --dark-color: #505050;
-  --text-color: #131313;
-  --link-color: #3b63fb;
-  --link-hover-color: #1d3ecf;
+  /* foundational colors */
+  --color-teal: #025e73;
+  --color-ink: #011f26;
+  --color-sage: #a5a692;
+  --color-sand: #bfb78f;
+  --color-sunrise: #f2a71b;
+  --color-paper: #f8f7f1;
+  --color-wash: #ebe8da;
+
+  /* semantic brand colors */
+  --background-color: var(--color-paper);
+  --light-color: var(--color-wash);
+  --dark-color: #01485a;
+  --text-color: var(--color-ink);
+  --link-color: var(--color-teal);
+  --link-hover-color: #014255;
+
+  /* category accents */
+  --color-food: var(--color-sunrise);
+  --color-housing: var(--color-teal);
+  --color-healthcare: #1f8070;
+  --color-legal: #66724f;
+  --color-financial: #b38f3f;
+  --color-family: var(--color-sage);
+  --color-employment: #8c7f55;
+  --color-crisis: #b24a2b;
+
+  /* spacing scale */
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2rem;
+  --space-xxl: 3rem;
+
+  /* border radius */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
 
   /* fonts */
   --body-font-family: roboto, roboto-fallback, sans-serif;
-  --heading-font-family: roboto-condensed, roboto-condensed-fallback, sans-serif;
+  --heading-font-family: roboto, roboto-fallback, sans-serif;
 
   /* body sizes */
   --body-font-size-m: 22px;
@@ -135,15 +176,15 @@ pre {
 }
 
 pre {
-  padding: 16px;
-  border-radius: 8px;
+  padding: var(--space-md);
+  border-radius: var(--radius-md);
   background-color: var(--light-color);
   overflow-x: auto;
   white-space: pre;
 }
 
 main > div {
-  margin: 40px 16px;
+  margin: var(--space-xxl) var(--space-md);
 }
 
 input,
@@ -167,7 +208,7 @@ a:hover {
 
 /* buttons */
 p.button-wrapper {
-  margin: 12px 0;
+  margin: var(--space-sm) 0;
 }
 
 a.button:any-link,
@@ -297,13 +338,13 @@ main img {
 
 /* sections */
 main > .section {
-  margin: 40px 0;
+  margin: var(--space-xxl) 0;
 }
 
 main > .section > div {
   max-width: 1200px;
   margin: auto;
-  padding: 0 24px;
+  padding: 0 var(--space-lg);
 }
 
 main > .section:first-of-type {
@@ -312,7 +353,7 @@ main > .section:first-of-type {
 
 @media (width >= 900px) {
   main > .section > div {
-    padding: 0 32px;
+    padding: 0 var(--space-xl);
   }
 }
 
@@ -321,5 +362,5 @@ main .section.light,
 main .section.highlight {
   background-color: var(--light-color);
   margin: 0;
-  padding: 40px 0;
+  padding: var(--space-xxl) 0;
 }
