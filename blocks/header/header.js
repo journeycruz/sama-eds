@@ -4,6 +4,47 @@ import { loadFragment } from '../fragment/fragment.js';
 // media query match that indicates mobile/tablet width
 const isDesktop = window.matchMedia('(min-width: 900px)');
 
+function createNavSection(...children) {
+  const section = document.createElement('div');
+  const wrapper = document.createElement('div');
+  wrapper.className = 'default-content-wrapper';
+  children.forEach((child) => {
+    if (child) wrapper.append(child);
+  });
+  section.append(wrapper);
+  return section;
+}
+
+function getPreferredBrandNode(nodes) {
+  const candidates = nodes.filter((node) => node.matches('p, picture, img, h1, h2, h3'));
+  if (!candidates.length) return null;
+  return candidates.find((node) => node.querySelector('picture'))
+    || candidates.find((node) => node.querySelector('img'))
+    || candidates[candidates.length - 1];
+}
+
+function normalizeNavFragment(fragment) {
+  const topLevelChildren = [...fragment.children];
+  if (topLevelChildren.length !== 1) return topLevelChildren;
+
+  const [wrapper] = topLevelChildren;
+  const directChildren = [...wrapper.children];
+  const defaultContentWrapper = wrapper.querySelector(':scope > .default-content-wrapper');
+  const nodes = defaultContentWrapper ? [...defaultContentWrapper.children] : directChildren;
+  if (!nodes.length) return topLevelChildren;
+
+  const brandContent = getPreferredBrandNode(nodes);
+  const navLists = nodes.filter((node) => node.matches('ul, ol'));
+
+  if (!brandContent && !navLists.length) return topLevelChildren;
+
+  const sections = [];
+  sections.push(createNavSection(brandContent));
+  sections.push(createNavSection(navLists[0] || document.createElement('ul')));
+  sections.push(createNavSection(navLists[1] || document.createElement('ul')));
+  return sections;
+}
+
 function closeOnEscape(e) {
   if (e.code === 'Escape') {
     const nav = document.getElementById('nav');
@@ -122,7 +163,7 @@ export default async function decorate(block) {
   block.textContent = '';
   const nav = document.createElement('nav');
   nav.id = 'nav';
-  while (fragment.firstElementChild) nav.append(fragment.firstElementChild);
+  normalizeNavFragment(fragment).forEach((section) => nav.append(section));
 
   const classes = ['brand', 'sections', 'tools'];
   classes.forEach((c, i) => {
@@ -131,7 +172,7 @@ export default async function decorate(block) {
   });
 
   const navBrand = nav.querySelector('.nav-brand');
-  const brandLink = navBrand.querySelector('.button');
+  const brandLink = navBrand?.querySelector('.button');
   if (brandLink) {
     brandLink.className = '';
     brandLink.closest('.button-container').className = '';
