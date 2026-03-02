@@ -7,6 +7,15 @@ description: Convert a Tailwind CSS-based HTML block into an AEM Edge Delivery S
 
 Generate a new AEM Edge Delivery Services (EDS) block from an HTML block styled with Tailwind CSS.
 
+## Header/Nav Preflight (Run Before Editing)
+
+Use this checklist whenever the conversion touches a header/nav block:
+- Confirm nav fragment contract before coding: identify where brand, primary links, and tool links come from.
+- Confirm theme tokens used by adjacent blocks (especially hero) so dark surfaces and CTA variants match exactly.
+- Plan CTA mode behavior up front: light mode uses link-blue token, dark mode uses sunrise accent token.
+- Reserve a CSS section order for mode overrides after base rules to avoid cascade regressions.
+- Include nav interaction coverage in scope: mobile toggle, overlay click close, Escape close, focus return, and desktop resize reset.
+
 ## When to Use This Skill
 
 Use this skill when:
@@ -39,7 +48,17 @@ Use this skill when:
 - Test the generated EDS block in a local AEM environment to ensure it renders correctly and that the styles are applied as expected.
 - Optimize the block for performance by minimizing the CSS and ensuring that it does not include any unnecessary styles or elements. Consider using EDS features such as lazy loading for images or conditional loading of styles to further enhance performance. 
 
+## Header Lessons Learned (Harvested)
+
+- Parse nav fragments defensively. Authoring order can vary, so add fallbacks when locating brand and link lists.
+- Verify theme parity across blocks using the exact same tokens. Similar tokens can drift visually in dark mode.
+- Treat CTA mode styling as a cascade risk; place dark-mode CTA overrides after base button rules.
+- Keep nav accessibility and interaction state explicit (ARIA expanded state, Escape handling, focus target on close, body scroll lock, desktop reset).
+- Validate desktop/mobile and light/dark combinations before finalizing.
+
 ## Troubleshooting  
 - If the block does not render correctly, review the mapping of Tailwind classes to EDS styles to ensure that all necessary styles are included and correctly applied.
 - Check the JavaScript code used to build the block for any errors or issues that may be affecting the rendering of the block.
 - Refer to the EDS documentation for any specific requirements or best practices that may be relevant to the block you are creating.
+- If light/dark CTA colors do not switch as expected, inspect rule order first; a later base `.button` rule can override earlier mode-specific styles.
+- If dark header does not match hero, compare token usage directly and align both to the same surface variable.

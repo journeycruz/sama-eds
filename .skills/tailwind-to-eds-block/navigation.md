@@ -1,4 +1,4 @@
-<!-- Context: tailwind-to-eds-block/navigation | Priority: critical | Version: 1.0 | Updated: 2026-03-01 -->
+<!-- Context: tailwind-to-eds-block/navigation | Priority: critical | Version: 1.1 | Updated: 2026-03-01 -->
 # Tailwind-to-EDS-Block Navigation
 
 **Purpose**: Fast routes for converting Tailwind examples into resilient, performant EDS blocks.
@@ -44,6 +44,7 @@ Use this file as the entrypoint: load concept first, then mapping, then implemen
 | File | Description | Priority |
 |------|-------------|----------|
 | `errors/eds-hero-conversion-errors.md` | Common conversion failures and fixes | high |
+| `errors/eds-header-conversion-errors.md` | Header/nav conversion pitfalls and fixes | high |
 
 ---
 
@@ -51,7 +52,7 @@ Use this file as the entrypoint: load concept first, then mapping, then implemen
 1. Start with `concepts/authoring-contract-first.md`.
 2. Use `lookup/tailwind-to-eds-mapping.md` while porting CSS.
 3. Apply `guides/harvest-implementation-checklist.md` before/after implementation.
-4. Use `examples/resilient-decorate-and-lcp-images.md` and `errors/eds-hero-conversion-errors.md` during debugging.
+4. Use `examples/resilient-decorate-and-lcp-images.md`, `errors/eds-hero-conversion-errors.md`, and `errors/eds-header-conversion-errors.md` during debugging.
 
 ## 📂 Codebase References
 - `blocks/hero/hero.js` - Decorator, row parsing, CTA normalization.
