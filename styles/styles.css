@@ -368,6 +368,10 @@ main > .section:first-of-type {
 }
 
 /* section metadata */
+.bg-wash {
+  background-color: var(--color-wash);
+}
+
 main .section.light,
 main .section.highlight {
   background-color: var(--light-color);
