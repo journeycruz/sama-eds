@@ -26,6 +26,12 @@ header .nav-root a {
   text-decoration: none;
 }
 
+header .nav-brand a,
+header .nav-panel-brand a {
+  display: inline-flex;
+  align-items: center;
+}
+
 header .nav-root a:hover,
 header .nav-root a:focus-visible {
   color: var(--link-hover-color);
@@ -37,6 +43,12 @@ header .nav-brand {
   align-items: center;
 }
 
+header .nav-brand picture,
+header .nav-panel-brand picture {
+  display: block;
+  line-height: 0;
+}
+
 header .nav-brand p,
 header .nav-panel-brand p {
   margin: 0;
@@ -44,6 +56,7 @@ header .nav-panel-brand p {
 
 header .nav-brand img,
 header .nav-panel-brand img {
+  display: block;
   height: 2rem;
   width: auto;
 }

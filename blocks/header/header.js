@@ -1,4 +1,4 @@
-import { getMetadata } from '../../scripts/aem.js';
+import { createOptimizedPicture, getMetadata } from '../../scripts/aem.js';
 import {
   a,
   button,
@@ -11,6 +11,7 @@ import {
 import { loadFragment } from '../fragment/fragment.js';
 
 const desktopMediaQuery = window.matchMedia('(min-width: 900px)');
+const LOGO_BREAKPOINTS = [{ media: '(min-width: 900px)', width: '240' }, { width: '160' }];
 
 const getNodeChildren = (element) => (element ? [...element.children] : []);
 
@@ -50,8 +51,16 @@ const listToLinks = (listElement) => {
     .filter((link) => link.label);
 };
 
+const createHeaderLogo = (alt = 'Site logo') => {
+  const logoSrc = new URL('/icons/logo.svg', window.location.origin).href;
+  return createOptimizedPicture(logoSrc, alt, true, LOGO_BREAKPOINTS);
+};
+
 const cleanBrandNode = (brandNode) => {
-  if (!brandNode) return span({ class: 'nav-brand-text' }, 'Brand');
+  if (!brandNode) {
+    return a({ href: '/', 'aria-label': 'Home' }, createHeaderLogo('Site logo'));
+  }
+
   const brand = brandNode.cloneNode(true);
   const buttonLink = brand.querySelector('.button');
   if (buttonLink) {
@@ -59,6 +68,19 @@ const cleanBrandNode = (brandNode) => {
     const container = buttonLink.closest('.button-container');
     if (container) container.className = '';
   }
+
+  const sourceImage = brandNode.querySelector('picture img, img');
+  const logoAlt = sourceImage?.getAttribute('alt') || brand.textContent.trim() || 'Site logo';
+  const optimizedLogo = createHeaderLogo(logoAlt);
+
+  const logoTarget = brand.querySelector('picture, img');
+  if (logoTarget) {
+    logoTarget.replaceWith(optimizedLogo);
+  } else {
+    const logoContainer = brand.querySelector('a') || brand;
+    logoContainer.prepend(optimizedLogo);
+  }
+
   return brand;
 };
 
