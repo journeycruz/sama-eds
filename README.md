@@ -1,5 +1,6 @@
-# Your Project's Title...
-Your project's description...
+# San Antonio Mutual Aid Directory
+
+Community-focused resource directory built with AEM Edge Delivery Services.
 
 ## Environments
 - Preview: https://main--{repo}--{owner}.aem.page/
@@ -18,6 +19,20 @@ Before using the aem-boilerplate, we recommand you to go through the documentati
 ```sh
 npm i
 ```
+
+## Content Model and Authoring
+
+- Canonical resource schema: `docs/content-model.md`
+- Validation utilities: `scripts/resource-schema.js`
+
+### Dataset-first workflow
+
+1. Add or update a resource record in the shared dataset.
+2. Ensure required fields are present: `id`, `slug`, `name`, `category`, `description`, `lastVerified`.
+3. Keep `slug` lowercase kebab-case and unique across all resources.
+4. Run validation in your integration path before publish.
+
+With this workflow, new resources appear in listing, detail, and search experiences from one source of truth, without manually assembling individual pages.
 
 ## Linting
 
