@@ -307,406 +307,258 @@ Each resource is authored as a page in the CMS (or as a static HTML file during 
 
 ---
 
-## Story 6: Resource Detail Block
+## Scalability Revision (Replaces Stories 6-12)
 
-**Goal:** Build a detail view block for individual resource pages showing all available information about a single organization.
+This revision keeps AEM Edge Delivery Services as the delivery platform and removes manual page assembly by making listings/details data-driven from a single indexed dataset.
+
+### Revised Story Map
+
+| # | Story | Branch | Depends On |
+|---|-------|--------|------------|
+| 6 | Resource Data Model & Slug Strategy | `story/6-data-model` | 5 |
+| 7 | Shared Resource Store (Index Access Layer) | `story/7-resource-store` | 6 |
+| 8 | Universal Category View Block | `story/8-category-view` | 7 |
+| 9 | Universal Resource Detail Block | `story/9-resource-detail-universal` | 7 |
+| 10 | Search, Filter & URL State Integration | `story/10-search-integration` | 8, 9 |
+| 11 | Authoring Scalability Workflow & Content QA | `story/11-authoring-qa` | 10 |
+| 12 | A11y, Performance, SEO & Launch Readiness | `story/12-quality-seo-launch` | 11 |
+
+---
+
+## Story 6: Resource Data Model & Slug Strategy
+
+**Goal:** Define a single, stable resource schema so category pages and detail pages can be generated from one source of truth.
 
 ### Tasks
 
-1. Create `blocks/resource-detail/resource-detail.js`:
-   - Renders full resource information from authored page content
-   - Structured sections: Overview, Contact, Hours, Eligibility, Location
-   - "Back to [Category]" breadcrumb link
-   - "Report outdated info" link (mailto or form link)
-
-2. Create `blocks/resource-detail/resource-detail.css`:
-   - Clean, scannable layout
-   - Contact info prominently displayed
-   - Map embed placeholder (static map image linking to Google Maps — no JS SDK needed)
-   - Print-friendly styles (media query `@media print`)
-
-3. Create test detail pages:
-   - `drafts/food/sa-food-bank.html`
-   - `drafts/crisis/sa-hope-hotline.html`
+1. Define required fields and optional fields:
+   - Required: `id`, `slug`, `name`, `category`, `description`, `lastVerified`
+   - Optional: `address`, `phone`, `website`, `hours`, `languages`, `eligibility`, `tags`
+2. Define slug rules:
+   - Lowercase, kebab-case, unique across all resources
+3. Add a schema validation helper in JS for required fields and basic formatting
+4. Update content guidance so adding a new resource means updating dataset only (not assembling full pages)
 
 ### Files Changed
 
-- `blocks/resource-detail/resource-detail.js` (new)
-- `blocks/resource-detail/resource-detail.css` (new)
-- `drafts/food/sa-food-bank.html` (new)
-- `drafts/crisis/sa-hope-hotline.html` (new)
+- `docs/content-model.md` (new)
+- `scripts/resource-schema.js` (new)
+- `README.md` (modify - authoring notes)
 
 ### Manual Verification
 
-- [ ] Open `http://localhost:3000/food/sa-food-bank` — detail page renders
-- [ ] All fields display: name, description, address, phone, website, hours, eligibility, languages
-- [ ] Phone is a clickable `tel:` link
-- [ ] Website opens in a new tab
-- [ ] "Back to Food & Groceries" breadcrumb links to `/food`
-- [ ] Address links to Google Maps
-- [ ] Print the page (Ctrl+P): layout is clean, no nav/footer clutter
-- [ ] Missing optional fields (e.g., no hours listed) don't leave empty sections
-- [ ] Mobile: all sections stack, contact info is tap-friendly
+- [ ] Schema doc includes required/optional fields and examples
+- [ ] Validation helper flags missing required fields
+- [ ] Slug uniqueness check works for duplicate slugs
+- [ ] Authoring instructions explain the new workflow clearly
+
+---
+
+## Story 7: Shared Resource Store (Index Access Layer)
+
+**Goal:** Create a reusable data access layer used by listing, detail, and search blocks.
+
+### Tasks
+
+1. Create `scripts/resource-store.js`:
+   - Fetch resource index (`/query-index.json` or configured equivalent)
+   - Cache response in-memory
+2. Expose utility methods:
+   - `getAllResources()`
+   - `getResourcesByCategory(category)`
+   - `getResourceBySlug(slug)`
+   - `searchResources(query, filters)`
+3. Normalize fields (tags array, trimmed strings, phone formatting fallback)
+4. Add robust error handling and empty dataset behavior
+
+### Files Changed
+
+- `scripts/resource-store.js` (new)
+- `scripts/scripts.js` (modify - import/reuse helper if needed)
+
+### Manual Verification
+
+- [ ] Initial fetch happens once and is cached
+- [ ] Category lookup returns expected records
+- [ ] Slug lookup returns exact resource
+- [ ] Search/filter returns consistent results across repeated calls
+- [ ] Error state is returned cleanly on failed fetch
+
+---
+
+## Story 8: Universal Category View Block
+
+**Goal:** Replace manual per-category listing assembly with one reusable category renderer.
+
+### Tasks
+
+1. Create `blocks/category-view/category-view.js`:
+   - Read category from URL (`?c=food`) and/or path mapping
+   - Request data from `resource-store`
+   - Render cards/list with sort + tag filters
+2. Create `blocks/category-view/category-view.css`:
+   - Responsive layout for cards/list
+   - Accessible filter controls and focus states
+3. Add loading, empty, and error states
+4. Convert category pages to thin shell pages containing this block only
+
+### Files Changed
+
+- `blocks/category-view/category-view.js` (new)
+- `blocks/category-view/category-view.css` (new)
+- `drafts/food.html` (modify - shell + block)
+- `drafts/housing.html` (new/modify)
+- `drafts/healthcare.html` (new/modify)
+- `drafts/legal.html` (new/modify)
+- `drafts/financial.html` (new/modify)
+- `drafts/family.html` (new/modify)
+- `drafts/employment.html` (new/modify)
+- `drafts/crisis.html` (modify - shell + block)
+
+### Manual Verification
+
+- [ ] Each category page renders resources without manual row assembly
+- [ ] Changing category input updates results correctly
+- [ ] Loading, empty, and error states display correctly
+- [ ] Mobile/tablet/desktop layouts are readable and usable
+- [ ] Keyboard users can operate filters and sort controls
+
+---
+
+## Story 9: Universal Resource Detail Block
+
+**Goal:** Use one detail block to render any resource by slug/id from shared data.
+
+### Tasks
+
+1. Refactor `blocks/resource-detail/resource-detail.js`:
+   - Read `?r=slug` and/or path-based slug
+   - Retrieve record from `resource-store`
+   - Render full detail sections conditionally
+2. Add fallback UI for missing/unknown slugs
+3. Generate breadcrumb from category metadata
+4. Keep contact actions accessible (`tel:` and external links)
+
+### Files Changed
+
+- `blocks/resource-detail/resource-detail.js` (modify)
+- `blocks/resource-detail/resource-detail.css` (modify)
+- `drafts/resource-detail.html` (new - generic detail shell)
+
+### Manual Verification
+
+- [ ] Valid slug renders correct resource
+- [ ] Unknown slug shows user-friendly not-found state
+- [ ] Missing optional fields do not create empty sections
+- [ ] Breadcrumb points to correct category page
+- [ ] Phone and website links behave correctly on mobile
+
+---
+
+## Story 10: Search, Filter & URL State Integration
+
+**Goal:** Unify search behavior with category/detail pages using the same shared dataset and URL state.
+
+### Tasks
+
+1. Update `blocks/search/search.js` to use `resource-store`
+2. Support shareable URL params: `?q=`, `?category=`, `?tags=`
+3. Sync URL state with UI controls (on load + on change)
+4. Reuse card rendering patterns for consistency
+
+### Files Changed
+
+- `blocks/search/search.js` (modify)
+- `blocks/search/search.css` (modify)
+- `drafts/search.html` (modify)
+
+### Manual Verification
+
+- [ ] URL params restore search state on page reload
+- [ ] Combined filters work together (query + category + tags)
+- [ ] No-results state is clear and actionable
+- [ ] Search interactions remain responsive on mobile
+
+---
+
+## Story 11: Authoring Scalability Workflow & Content QA
+
+**Goal:** Make "add one resource" a low-friction workflow with quality checks.
+
+### Tasks
+
+1. Document authoring workflow:
+   - Add/update one resource entry
+   - Verify slug uniqueness
+   - Confirm category and last verified date
+2. Add content QA script/checks:
+   - Missing required fields
+   - Duplicate slugs
+   - Invalid links/phone formats (basic validation)
+3. Add stale-content indicator policy using `lastVerified`
+
+### Files Changed
+
+- `docs/authoring-workflow.md` (new)
+- `scripts/content-qa.js` (new)
+- `package.json` (modify - add QA script command if needed)
+
+### Manual Verification
+
+- [ ] New resource appears in category/detail/search without manual page build
+- [ ] QA checks catch intentionally malformed records
+- [ ] Duplicate slug is detected and reported
+- [ ] Workflow can be followed in under 5 minutes per resource
+
+---
+
+## Story 12: A11y, Performance, SEO & Launch Readiness
+
+**Goal:** Production-quality polish for the data-driven architecture.
+
+### Tasks
+
+1. Accessibility pass:
+   - Keyboard flow, ARIA labels, heading hierarchy, contrast
+   - Loading/error state announcements where appropriate
+2. Performance pass:
+   - Keep JS lightweight, defer non-critical behavior
+   - Ensure list rendering remains fast for 100+ resources
+3. SEO pass:
+   - Canonical URL strategy for category/detail pages
+   - Metadata consistency and sitemap coverage
+4. Final QA across home/category/detail/search templates
+
+### Files Changed
+
+- `head.html` (modify)
+- `styles/styles.css` (modify)
+- `styles/lazy-styles.css` (modify)
+- Block CSS/JS files from Stories 8-10 (polish)
+
+### Manual Verification
+
+- [ ] Lighthouse targets met on key templates
+- [ ] axe reports no critical or serious violations
+- [ ] Category/detail/search pages are indexable with canonical URLs
+- [ ] Full user journey works on desktop + mobile
 - [ ] `npm run lint` passes
 
 ---
 
-## Story 7: Search & Filter Block
+## Updated Technical Decisions & Rationale
 
-**Goal:** Add a site-wide search block that lets users find resources by keyword, category, or tag — without any backend. Pure client-side search using AEM's query index.
+### Why no dedicated backend (yet)?
 
-### Tasks
+For this stage, a custom backend increases cost and maintenance (hosting, auth, uptime, API versioning, monitoring) without being necessary for a directory expected to run efficiently from indexed content. AEM EDS already supports high-performance static delivery plus index-driven client-side rendering.
 
-1. Set up the AEM query index:
-   - Create a spreadsheet-based index (or configure via `helix-query.yaml`) that indexes all resource pages with fields: path, title, description, category, tags, address, phone
+### How scalability is achieved in this revision
 
-2. Create `blocks/search/search.js`:
-   - Fetch the query index JSON at page load
-   - Text input with real-time filtering (debounced, 300ms)
-   - Category dropdown filter
-   - Results rendered as compact resource cards (reuse styles from resource-listing)
-   - "No results found" state with suggestions
-   - URL parameter support: `?q=food&category=food` for shareable searches
+Scalability comes from a single resource dataset + shared resource store + universal category/detail/search blocks. Adding a new resource updates one data source and automatically flows into listing, detail, and search views.
 
-3. Create `blocks/search/search.css`:
-   - Search input: large, prominent, with search icon
-   - Filter controls: horizontal on desktop, stacked on mobile
-   - Results count indicator
-   - Loading state
+### When to introduce a backend later
 
-4. Add search to the homepage and header:
-   - Homepage: search block below the hero
-   - Header: search icon that opens search (or links to search page)
-
-5. Create `drafts/search.html` — dedicated search page
-
-### Files Changed
-
-- `blocks/search/search.js` (new)
-- `blocks/search/search.css` (new)
-- `helix-query.yaml` (new — or a query index spreadsheet)
-- `drafts/search.html` (new)
-- `drafts/index.html` (modify — add search block)
-- `blocks/header/header.js` (modify — search icon behavior)
-
-### Manual Verification
-
-- [ ] Open `http://localhost:3000/search` — search page loads with input field
-- [ ] Type "food" — results filter to food-related resources
-- [ ] Select "Healthcare" from category dropdown — only healthcare resources show
-- [ ] Combine text search + category filter — both apply
-- [ ] Clear search — all resources return
-- [ ] No results: "No resources found" message appears with suggestions
-- [ ] URL updates with search params: `?q=food`
-- [ ] Refresh page with params — search restores from URL
-- [ ] Homepage search input works and links to `/search?q={query}`
-- [ ] Mobile: search input is full-width, usable with thumb
-- [ ] Performance: search responds within 100ms after index loads
-- [ ] `npm run lint` passes
-
----
-
-## Story 8: Test Content — Full Directory Data
-
-**Goal:** Populate the directory with real San Antonio mutual aid resources. Research and add at least 5-8 verified resources per category (40-64 total) to make the site genuinely useful.
-
-### Tasks
-
-1. Research real San Antonio mutual aid organizations:
-   - San Antonio Food Bank
-   - Haven for Hope (shelter)
-   - CentroMed (healthcare)
-   - RAICES (legal/immigration)
-   - SAMMinistries (housing)
-   - Family Service Association
-   - Goodwill San Antonio (employment)
-   - The P.E.A.C.E. Initiative (crisis)
-   - Catholic Charities Archdiocese of San Antonio
-   - University Health (Bexar County healthcare)
-   - And many more...
-
-2. Create static HTML content files for each resource in `drafts/`:
-   - Follow the content model defined above
-   - Include real addresses, phone numbers, websites, hours
-   - Mark each with a "Last Verified" date
-
-3. Create all 8 category listing pages with their resources
-
-4. Update the homepage with accurate featured resources
-
-5. Create `drafts/about.html` and `drafts/submit.html` pages
-
-### Files Changed
-
-- `drafts/food/*.html` (5-8 new files)
-- `drafts/housing/*.html` (5-8 new files)
-- `drafts/healthcare/*.html` (5-8 new files)
-- `drafts/legal/*.html` (5-8 new files)
-- `drafts/financial/*.html` (5-8 new files)
-- `drafts/family/*.html` (5-8 new files)
-- `drafts/employment/*.html` (5-8 new files)
-- `drafts/crisis/*.html` (5-8 new files)
-- `drafts/about.html` (new)
-- `drafts/submit.html` (new)
-- All 8 category listing pages updated
-
-### Manual Verification
-
-- [ ] Every category page has at least 5 resources listed
-- [ ] Click through to 5+ individual resource detail pages — all fields populated
-- [ ] Phone numbers are correct format and clickable
-- [ ] Website links open the correct external sites
-- [ ] Google Maps links point to correct San Antonio addresses
-- [ ] No placeholder or "Lorem ipsum" text remains anywhere
-- [ ] About page explains the project mission
-- [ ] Submit page explains how to contribute or report issues
-- [ ] Search finds resources across all categories
-- [ ] Spanish-language resource names display correctly (accents, ñ)
-
----
-
-## Story 9: Accessibility & Performance Audit
-
-**Goal:** Ensure the site meets WCAG 2.1 AA and achieves a Lighthouse score of 95+ across all categories.
-
-### Tasks
-
-1. Accessibility audit:
-   - Run axe DevTools on every page template (home, listing, detail, search, about)
-   - Fix all critical and serious violations
-   - Verify heading hierarchy (single H1, sequential headings)
-   - Ensure all images have alt text
-   - Verify color contrast ratios (≥ 4.5:1 for text, ≥ 3:1 for large text)
-   - Test keyboard navigation: every interactive element reachable via Tab
-   - Add skip navigation link
-   - Ensure `aria-label` on search input, filter controls, nav landmarks
-   - Add `lang="en"` to HTML (and `lang="es"` spans where appropriate)
-
-2. Performance optimization:
-   - Run Lighthouse on all page templates
-   - Ensure no render-blocking resources beyond critical CSS
-   - Verify lazy loading on below-fold images
-   - Check total page weight < 200KB (excluding images)
-   - Minimize CSS specificity and unused rules
-   - Verify fonts load with `font-display: swap` (already set)
-
-3. Add `styles/lazy-styles.css` content:
-   - Move non-LCP styles here (search block, footer details, print styles)
-
-4. Add to `scripts/delayed.js`:
-   - Any analytics or tracking (if applicable)
-
-### Files Changed
-
-- Multiple block CSS/JS files (fixes)
-- `styles/styles.css` (contrast fixes, skip nav)
-- `styles/lazy-styles.css` (non-critical styles)
-- `scripts/delayed.js` (analytics stub)
-- `head.html` (lang attribute, any meta fixes)
-
-### Manual Verification
-
-- [ ] Lighthouse scores: Performance ≥ 95, Accessibility = 100, Best Practices ≥ 95, SEO ≥ 95
-- [ ] axe DevTools: 0 critical or serious violations on homepage, listing, detail, search
-- [ ] Keyboard-only navigation: complete a full user journey (home → category → resource → back)
-- [ ] Screen reader (VoiceOver/NVDA): page structure is announced correctly
-- [ ] Skip nav link appears on focus and jumps to main content
-- [ ] Tab order is logical (no focus traps)
-- [ ] High contrast mode: content remains readable
-- [ ] Zoom to 200%: no content is cut off or overlapping
-- [ ] `npm run lint` passes
-
----
-
-## Story 10: SEO, Sitemap & Open Graph
-
-**Goal:** Ensure the site is discoverable by search engines and shares well on social media. Critical for a community resource — people need to find this via Google.
-
-### Tasks
-
-1. SEO metadata on every page:
-   - Unique `<title>` per page: "[Resource Name] | SA Mutual Aid" or "[Category] Resources | SA Mutual Aid"
-   - Meta descriptions (unique per page, 150-160 chars)
-   - Canonical URLs
-
-2. Open Graph and Twitter Card tags in `head.html`:
-   - `og:title`, `og:description`, `og:image`, `og:url`, `og:type`
-   - `twitter:card`, `twitter:title`, `twitter:description`
-   - Create a default social share image (`icons/og-image.png`)
-
-3. Structured data (JSON-LD) for resources:
-   - Schema.org `Organization` or `LocalBusiness` type for each resource
-   - Include: name, address, telephone, openingHours, url
-   - Add to resource detail pages via `scripts/delayed.js`
-
-4. Configure sitemap:
-   - Set up `helix-sitemap.yaml` or use AEM's automatic sitemap generation
-   - Verify sitemap includes all category and resource pages
-
-5. Configure `robots.txt`:
-   - Allow all crawlers
-   - Reference sitemap URL
-
-### Files Changed
-
-- `head.html` (OG tags, structured data hook)
-- `scripts/delayed.js` (JSON-LD injection)
-- `helix-sitemap.yaml` (new, if manual config needed)
-- `icons/og-image.png` (new)
-- Various `drafts/*.html` (metadata additions)
-
-### Manual Verification
-
-- [ ] View page source on homepage: `<title>`, meta description, OG tags present
-- [ ] View page source on a resource detail: unique title and description
-- [ ] Paste a resource URL into the Facebook Sharing Debugger — preview renders correctly
-- [ ] Paste URL into Twitter Card Validator — card renders
-- [ ] Open `/sitemap.xml` — all pages listed
-- [ ] Open `/robots.txt` — allows crawling, references sitemap
-- [ ] Google Rich Results Test: structured data validates for a resource detail page
-- [ ] No duplicate titles or descriptions across pages
-- [ ] `npm run lint` passes
-
----
-
-## Story 11: CDN Configuration & Custom Domain
-
-**Goal:** Set up production infrastructure so the site is served from a custom domain with SSL, CDN caching, and fast global delivery.
-
-### Tasks
-
-1. **Choose and register domain:**
-   - Recommended: `samutualaid.org` or `sa-mutualaid.org`
-   - Register via Namecheap, Google Domains, Cloudflare Registrar, etc.
-   - Ensure WHOIS privacy is enabled
-
-2. **Choose CDN approach** (two options):
-
-   **Option A: Adobe Managed CDN (Simpler)**
-   - Contact Adobe support (via AEM Slack channel or support portal)
-   - Provide: custom domain + site name (`main--sama-eds--journeycruz`)
-   - Adobe provides: IP addresses for A records + ACME challenge CNAME
-   - Set DNS records:
-     - `www` CNAME → `cdn.adobeaemcloud.com`
-     - Apex A records → Adobe-provided IPs
-     - ACME challenge CNAME for SSL certificate validation
-   - Wait for Let's Encrypt certificate issuance (up to 7 days for validation)
-
-   **Option B: Cloudflare BYO CDN (More Control)**
-   - Create Cloudflare account, add domain
-   - Update nameservers at registrar to Cloudflare
-   - Create Worker or Page Rule to proxy to `main--sama-eds--journeycruz.aem.live`
-   - Configure caching rules
-   - Enable Cloudflare SSL (Full Strict)
-   - Set up push invalidation integration
-
-3. **DNS Configuration:**
-   - Set TTL to 3600 (1 hour) initially
-   - Before go-live: temporarily lower to 60 seconds for fast propagation
-   - After go-live stabilizes: restore to 3600+
-
-4. **SSL Verification:**
-   - Verify HTTPS works on custom domain
-   - Verify HTTP redirects to HTTPS
-   - Verify www redirects to apex (or vice versa — pick one canonical form)
-
-5. **Update configuration:**
-   - Update `fstab.yaml` or AEM Configuration Service with production domain
-   - Update sitemap references to use custom domain
-   - Update OG tags to reference custom domain
-
-### Files Changed
-
-- DNS records (external — at registrar/Cloudflare)
-- `fstab.yaml` or Configuration Service (update)
-- `head.html` (canonical URL update)
-
-### Manual Verification
-
-- [ ] `https://samutualaid.org` loads the site (replace with actual domain)
-- [ ] `http://samutualaid.org` redirects to HTTPS
-- [ ] `https://www.samutualaid.org` redirects to apex (or vice versa)
-- [ ] SSL certificate is valid (check in browser padlock)
-- [ ] SSL Labs test (ssllabs.com): Grade A or A+
-- [ ] All internal links work on the custom domain
-- [ ] Images and assets load correctly (no mixed content warnings)
-- [ ] Page loads in < 1.5 seconds on 4G connection (test via WebPageTest)
-- [ ] CDN cache headers present: `cache-control`, `x-cache: HIT` on repeat visits
-
----
-
-## Story 12: Go-Live Checklist & Launch
-
-**Goal:** Final validation, content review, and public launch of the San Antonio Mutual Aid Directory.
-
-### Tasks
-
-1. **Content review:**
-   - Verify every resource has accurate, current information
-   - Confirm phone numbers by calling them
-   - Verify website links are not broken (automated link checker)
-   - Ensure no test/placeholder content remains
-
-2. **Cross-browser testing:**
-   - Chrome (latest)
-   - Safari (latest)
-   - Firefox (latest)
-   - Samsung Internet (high SA usage)
-   - iOS Safari
-   - Chrome on Android
-
-3. **PageSpeed Insights:**
-   - Run against production URL
-   - Target: 100 on mobile and desktop
-   - Fix any flagged issues
-
-4. **Final AEM checks:**
-   - `gh pr checks` on main branch — all green
-   - Verify AEM Code Sync has processed latest changes
-   - Confirm `.aem.live` URL matches custom domain content
-
-5. **Launch communications:**
-   - Prepare a simple announcement for local community groups
-   - Include QR code linking to the site
-   - Share with San Antonio mutual aid networks, neighborhood associations, 311
-
-6. **Post-launch monitoring:**
-   - Monitor AEM RUM (Real User Monitoring) for errors
-   - Watch for 404s in the first week
-   - Set up a process for community submissions and resource updates
-
-### Manual Verification
-
-- [ ] Visit every page on production domain — no 404s
-- [ ] Test on a real phone (not just DevTools emulation)
-- [ ] Complete a full user journey on mobile: search → find resource → call phone number
-- [ ] PageSpeed Insights: all scores ≥ 95 on production URL
-- [ ] Share URL on social media: OG image and description render correctly
-- [ ] All 8 category pages load and display resources
-- [ ] Search works on production
-- [ ] 404 page displays correctly for invalid URLs
-- [ ] `robots.txt` and `sitemap.xml` accessible on production domain
-- [ ] Google Search Console: submit sitemap, verify no crawl errors
-
----
-
-## Technical Decisions & Rationale
-
-### Why no database or API?
-
-AEM Edge Delivery Services is built around static content delivery. Resources are authored as content pages and indexed via AEM's query index. This gives us sub-100ms page loads, zero infrastructure cost, and the ability for non-technical community members to update content through the AEM authoring interface (Google Docs or SharePoint). For an MVP serving a single city, this is the right tradeoff — we can always add a backend later if the directory grows beyond what static indexing supports.
-
-### Why client-side search?
-
-AEM provides a JSON query index (`/query-index.json`) that contains metadata for all pages. For a directory of ~50-100 resources, loading this index and filtering in the browser is faster than any server roundtrip. The index is cached by the CDN, so repeat searches are instant.
-
-### Why no map integration in MVP?
-
-Embedding Google Maps or Mapbox adds JavaScript weight, API key management, and cost. For MVP, each resource links to Google Maps via a `https://www.google.com/maps/dir/?api=1&destination={address}` intent URL. This is zero-cost, works on every device, and opens the user's native maps app on mobile. A map view can be added in a future iteration.
-
-### Why these 8 categories?
-
-These are based on the most common needs documented by existing San Antonio mutual aid networks (SA Mutual Aid, San Antonio Food Bank community surveys, and 211 Texas call data). The categories can be expanded post-launch based on community feedback.
+Introduce a backend only if requirements exceed this model (complex write workflows, advanced permissions, external system integrations, heavy analytics querying, or volume that exceeds practical client-side/index patterns).
 
 ---
 
