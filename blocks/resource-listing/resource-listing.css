@@ -1,0 +1,133 @@
+@layer blocks {
+.resource-listing {
+  display: grid;
+  gap: var(--space-lg);
+}
+
+.resource-listing .resource-listing-controls {
+  display: grid;
+  gap: var(--space-md);
+}
+
+.resource-listing .resource-listing-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+}
+
+.resource-listing .resource-listing-filter,
+.resource-listing .resource-listing-sort {
+  border: 1px solid color-mix(in srgb, var(--color-ink) 25%, transparent);
+  border-radius: 999px;
+  padding: 0.35rem 0.8rem;
+  background: var(--color-paper);
+  color: var(--text-color);
+  font-size: var(--body-font-size-xs);
+  line-height: 1.2;
+  cursor: pointer;
+}
+
+.resource-listing .resource-listing-filter.is-active,
+.resource-listing .resource-listing-filter:hover,
+.resource-listing .resource-listing-filter:focus-visible,
+.resource-listing .resource-listing-sort:hover,
+.resource-listing .resource-listing-sort:focus-visible {
+  border-color: var(--link-color);
+  background: color-mix(in srgb, var(--link-color) 10%, var(--color-paper));
+  color: var(--link-color);
+}
+
+.resource-listing .resource-listing-results {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--space-md);
+  margin: 0;
+  padding: 0;
+}
+
+.resource-listing.compact .resource-listing-results {
+  grid-template-columns: 1fr;
+}
+
+.resource-listing .resource-listing-card {
+  height: 100%;
+  border: 1px solid color-mix(in srgb, var(--color-ink) 12%, transparent);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  background: var(--color-paper);
+  box-shadow: 0 1px 2px color-mix(in srgb, var(--color-ink) 8%, transparent);
+}
+
+.resource-listing .resource-listing-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-sm);
+}
+
+.resource-listing .resource-listing-name {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.resource-listing .resource-listing-verified {
+  flex-shrink: 0;
+  border-radius: 999px;
+  padding: 0.2rem 0.5rem;
+  background: color-mix(in srgb, var(--color-food) 22%, var(--color-paper));
+  color: var(--color-ink);
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.resource-listing .resource-listing-description {
+  margin: var(--space-sm) 0;
+  font-size: var(--body-font-size-xs);
+}
+
+.resource-listing .resource-listing-meta {
+  display: grid;
+  gap: var(--space-xs);
+}
+
+.resource-listing .resource-listing-address,
+.resource-listing .resource-listing-phone {
+  margin: 0;
+  font-size: var(--body-font-size-xs);
+}
+
+.resource-listing .resource-listing-label {
+  font-weight: 500;
+}
+
+.resource-listing .resource-listing-phone-link {
+  font-weight: 600;
+}
+
+.resource-listing .resource-listing-tags {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+  margin: var(--space-sm) 0 0;
+  padding: 0;
+}
+
+.resource-listing .resource-listing-tag {
+  display: inline-block;
+  border-radius: 999px;
+  padding: 0.15rem 0.5rem;
+  background: color-mix(in srgb, var(--color-teal) 12%, var(--color-paper));
+  color: var(--text-color);
+  font-size: 0.75rem;
+}
+
+@media (width >= 900px) {
+  .resource-listing .resource-listing-controls {
+    grid-template-columns: 1fr auto;
+    align-items: center;
+  }
+}
+}

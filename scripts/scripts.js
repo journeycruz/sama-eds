@@ -12,6 +12,26 @@ import {
   loadCSS,
 } from './aem.js';
 
+export const formatPhone = (number = '') => {
+  const digits = String(number).replace(/\D/g, '');
+  const normalized = digits.length === 11 && digits.startsWith('1') ? digits.slice(1) : digits;
+  if (normalized.length !== 10) {
+    return String(number).trim();
+  }
+
+  return `(${normalized.slice(0, 3)}) ${normalized.slice(3, 6)}-${normalized.slice(6)}`;
+};
+
+export const getMapsUrl = (address = '') => {
+  const normalizedAddress = String(address).trim();
+  if (!normalizedAddress) {
+    return null;
+  }
+
+  const destination = encodeURIComponent(normalizedAddress);
+  return `https://www.google.com/maps/dir/?api=1&destination=${destination}`;
+};
+
 /**
  * Builds hero block and prepends to main in a new section.
  * @param {Element} main The container element
