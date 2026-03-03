@@ -1,6 +1,5 @@
 import {
   a,
-  img,
   li,
   span,
   ul,
@@ -140,6 +139,7 @@ const createCard = ({
 }) => {
   const item = li();
   item.style.setProperty('--category-accent', `var(${token})`);
+  item.style.setProperty('--category-icon', `url("/icons/${slug}.svg")`);
 
   const card = a(
     {
@@ -149,13 +149,7 @@ const createCard = ({
     },
     span(
       { class: 'category-cards-card-icon' },
-      img({
-        src: `/icons/${slug}.svg`,
-        width: '28',
-        height: '28',
-        alt: '',
-        loading: 'lazy',
-      }),
+      span({ class: 'category-cards-card-icon-glyph', 'aria-hidden': 'true' }),
     ),
     span(
       { class: 'category-cards-card-body' },
