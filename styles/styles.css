@@ -19,6 +19,9 @@
  * - #bfb78f (sand)
  * - #f2a71b (sunrise)
  */
+@layer base, blocks;
+
+@layer base {
 :root {
   /* foundational colors */
   --color-teal: #025e73;
@@ -377,4 +380,5 @@ main .section.highlight {
   background-color: var(--light-color);
   margin: 0;
   padding: var(--space-xxl) 0;
+}
 }
