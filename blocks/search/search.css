@@ -1,0 +1,195 @@
+@layer blocks {
+.search {
+  display: grid;
+  gap: var(--space-lg);
+}
+
+.search .search-layout {
+  display: grid;
+  gap: var(--space-md);
+}
+
+.search .search-controls {
+  display: grid;
+  gap: var(--space-sm);
+}
+
+.search .search-query,
+.search .search-category {
+  width: 100%;
+  min-height: 2.5rem;
+  border: 1px solid color-mix(in srgb, var(--color-ink) 25%, transparent);
+  border-radius: var(--radius-sm);
+  padding: 0.5rem 0.75rem;
+  background: var(--color-paper);
+  color: var(--text-color);
+}
+
+.search .search-query:focus-visible,
+.search .search-category:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--link-color) 55%, transparent);
+  outline-offset: 1px;
+}
+
+.search .search-submit {
+  min-height: 2.5rem;
+  border: 1px solid color-mix(in srgb, var(--color-ink) 25%, transparent);
+  border-radius: 999px;
+  padding: 0.35rem 1rem;
+  background: var(--color-paper);
+  color: var(--text-color);
+  cursor: pointer;
+}
+
+.search .search-submit:hover,
+.search .search-submit:focus-visible {
+  border-color: var(--link-color);
+  background: color-mix(in srgb, var(--link-color) 10%, var(--color-paper));
+  color: var(--link-color);
+}
+
+.search .search-tag-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+}
+
+.search .search-tag-filter {
+  border: 1px solid color-mix(in srgb, var(--color-ink) 25%, transparent);
+  border-radius: 999px;
+  padding: 0.35rem 0.8rem;
+  background: var(--color-paper);
+  color: var(--text-color);
+  font-size: var(--body-font-size-xs);
+  cursor: pointer;
+}
+
+.search .search-tag-filter.is-active,
+.search .search-tag-filter:hover,
+.search .search-tag-filter:focus-visible {
+  border-color: var(--link-color);
+  background: color-mix(in srgb, var(--link-color) 9%, var(--color-paper));
+  color: var(--link-color);
+}
+
+.search .search-count {
+  margin: 0;
+  color: color-mix(in srgb, var(--color-ink) 72%, var(--color-paper));
+  font-size: var(--body-font-size-xs);
+}
+
+.search .search-status {
+  border: 1px solid color-mix(in srgb, var(--color-ink) 16%, transparent);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  background: var(--color-paper);
+  color: var(--text-color);
+}
+
+.search .search-status-loading {
+  background: color-mix(in srgb, var(--color-info) 9%, var(--color-paper));
+}
+
+.search .search-status-empty {
+  background: color-mix(in srgb, var(--color-warn) 10%, var(--color-paper));
+}
+
+.search .search-status-error {
+  background: color-mix(in srgb, var(--color-danger) 8%, var(--color-paper));
+}
+
+.search .search-results {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--space-md);
+  margin: 0;
+  padding: 0;
+}
+
+.search.compact .search-results {
+  grid-template-columns: 1fr;
+}
+
+.search .search-card {
+  height: 100%;
+  border: 1px solid color-mix(in srgb, var(--color-ink) 12%, transparent);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  background: var(--color-paper);
+  box-shadow: 0 1px 2px color-mix(in srgb, var(--color-ink) 8%, transparent);
+}
+
+.search .search-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-sm);
+}
+
+.search .search-name {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.search .search-verified {
+  flex-shrink: 0;
+  border-radius: 999px;
+  padding: 0.2rem 0.5rem;
+  background: color-mix(in srgb, var(--color-food) 20%, var(--color-paper));
+  color: var(--color-ink);
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.search .search-description {
+  margin: var(--space-sm) 0;
+  font-size: var(--body-font-size-xs);
+}
+
+.search .search-card-meta {
+  display: grid;
+  gap: var(--space-xs);
+}
+
+.search .search-address,
+.search .search-phone,
+.search .search-actions {
+  margin: 0;
+  font-size: var(--body-font-size-xs);
+}
+
+.search .search-actions {
+  margin-top: var(--space-sm);
+}
+
+.search .search-label {
+  font-weight: 500;
+}
+
+.search .search-tags {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+  margin: var(--space-sm) 0 0;
+  padding: 0;
+}
+
+.search .search-tag {
+  display: inline-block;
+  border-radius: 999px;
+  padding: 0.15rem 0.5rem;
+  background: color-mix(in srgb, var(--color-teal) 12%, var(--color-paper));
+  color: var(--text-color);
+  font-size: 0.75rem;
+}
+
+@media (width >= 900px) {
+  .search .search-controls {
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    align-items: center;
+  }
+}
+}

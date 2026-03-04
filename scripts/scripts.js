@@ -32,6 +32,54 @@ export const getMapsUrl = (address = '') => {
   return `https://www.google.com/maps/dir/?api=1&destination=${destination}`;
 };
 
+const normalizePathname = (pathname = '/') => {
+  if (!pathname || pathname === '/') {
+    return '/';
+  }
+
+  return pathname.endsWith('/') ? pathname.slice(0, -1) : pathname;
+};
+
+const setOrCreateMeta = (name, content) => {
+  let meta = document.head.querySelector(`meta[name="${name}"]`);
+  if (!meta) {
+    meta = document.createElement('meta');
+    meta.setAttribute('name', name);
+    document.head.append(meta);
+  }
+
+  meta.setAttribute('content', content);
+};
+
+const setOrCreateLink = (rel, href) => {
+  let link = document.head.querySelector(`link[rel="${rel}"]`);
+  if (!link) {
+    link = document.createElement('link');
+    link.setAttribute('rel', rel);
+    document.head.append(link);
+  }
+
+  link.setAttribute('href', href);
+};
+
+const isNoindexUtilityPath = (pathname) => {
+  const normalizedPath = normalizePathname(pathname);
+  return normalizedPath.includes('/fragments/')
+    || normalizedPath.includes('/drafts/')
+    || normalizedPath.endsWith('/search')
+    || normalizedPath.endsWith('/resource-detail');
+};
+
+const applySeoDirectives = () => {
+  const canonicalPath = normalizePathname(window.location.pathname);
+  const canonicalUrl = `${window.location.origin}${canonicalPath}`;
+  setOrCreateLink('canonical', canonicalUrl);
+
+  if (isNoindexUtilityPath(canonicalPath)) {
+    setOrCreateMeta('robots', 'noindex,follow');
+  }
+};
+
 /**
  * Builds hero block and prepends to main in a new section.
  * @param {Element} main The container element
@@ -152,6 +200,7 @@ export function decorateMain(main) {
  */
 async function loadEager(doc) {
   document.documentElement.lang = 'en';
+  applySeoDirectives();
   decorateTemplateAndTheme();
   const main = doc.querySelector('main');
   if (main) {
